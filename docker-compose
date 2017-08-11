@@ -8,9 +8,9 @@ services:
     environment:
       - VIRTUAL_HOST=cajero.dev
     volumes:
-      - ./cajero:/var/www/cajero
-      - ./cajero/config-docker/sites:/etc/nginx/conf.d
-      - ./cajero/config-docker/logs:/var/log/supervisor
+      - .:/var/www/cajero
+      - ./config-docker/sites:/etc/nginx/conf.d
+      - ./config-docker/logs:/var/log/supervisor
 
   proxy:
     image: jwilder/nginx-proxy

@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Cajero
+ *
+ * PHP version 5.6
+ *
+ * @category Training
+ * @author   Marcelo Rusconi <mgrusconi@gmail.com>
+ *
+ */
 class Cajero {
 
     private $billetes = array(
@@ -9,11 +18,19 @@ class Cajero {
         '100' => 0,
         '500' => 0,
     );
-
     private $maximaPorBillete = 1000;
     private $maxBilleteDeposito = 100;
     private $extraccionMaxima = 1000;
 
+    /**
+     * Realiza un nuevo deposito
+     *
+     * @param integer $cant,  integer $denominacion
+     *
+     * @throws \Exception
+     *
+     * @return \Array
+     */
     public function depositar($cant, $denominacion){
         if(!is_int($cant) || !is_int($denominacion)){
             throw new Exception ('Parametros invalidos, los 2 parametros deben ser de tipo "integer"');
@@ -35,6 +52,15 @@ class Cajero {
         return $response;
     }
 
+    /**
+     * Realiza una nueva Extraccion
+     *
+     * @param integer $monto
+     *
+     * @throws \Exception
+     *
+     * @return \Array
+     */
     public function extraer($monto){
         if(!is_int($monto)){
             throw new Exception ('Parametro invalido, el parametro debe ser de tipo "integer"');
@@ -60,9 +86,10 @@ class Cajero {
                     }
                 }
             }else{
-                exit;
+                break;
             }
         }
+
         if($resto === 0){
             $this->restarBilletes($billetesPorDenaminacion);
         }else{
@@ -77,10 +104,28 @@ class Cajero {
         return $response;
     }
 
+    /**
+     * Retorna la capacidad restante dentro del cajero para guardar billetes
+     *
+     * @param integer $denominacion
+     *
+     * @throws \Exception
+     *
+     * @return integer
+     */
     private function getCapacidadRestante($denominacion) {
         return $this->maximaPorBillete - $this->billetes[$denominacion];
     }
 
+    /**
+     * Retorna el total de efectivo dentro del cajero
+     *
+     * @param void
+     *
+     * @throws \Exception
+     *
+     * @return integer
+     */
     private function getEfectivoTotal(){
         $total = 0;
         foreach ($this->billetes as $denominacion => $cantidadBilletes){
@@ -89,6 +134,13 @@ class Cajero {
         return $total;
     }
 
+    /**
+     * Retorna una matriz con todos Billetes que tengan stock en el cajero
+     *
+     * @param void
+     *
+     * @return Array
+     */
     private function getBilletes(){
         $billetes = array();
         foreach ($this->billetes as $denominacion => $cantidadBilletes){
@@ -100,6 +152,13 @@ class Cajero {
         return $billetes;
     }
 
+    /**
+     * Metodo que resta los billetes extraidos del cajero
+     *
+     * @param Array $billetes
+     *
+     * @return void
+     */
     private function restarBilletes($billetes){
         foreach ($billetes as $denominacion => $cantidadBilletes){
             $this->billetes[$denominacion] -= $cantidadBilletes;

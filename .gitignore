@@ -1,2 +1,4 @@
 .idea
 .idea/*
+config-docker/logs
+config-docker/logs/*

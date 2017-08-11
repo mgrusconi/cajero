@@ -29,38 +29,62 @@ RUN apt-get update && apt-get install -my \
   php5-dev \
   pkg-config \
   locales
-
+##############################################################################
 # Ensure that PHP5 FPM is run as root.
+##############################################################################
 RUN sed -i "s/user = www-data/user = root/" /etc/php5/fpm/pool.d/www.conf
 RUN sed -i "s/group = www-data/group = root/" /etc/php5/fpm/pool.d/www.conf
 
+##############################################################################
 # Pass all docker environment
+##############################################################################
 RUN sed -i '/^;clear_env = no/s/^;//' /etc/php5/fpm/pool.d/www.conf
 
+##############################################################################
 # Get access to FPM-ping page /ping
+##############################################################################
 RUN sed -i '/^;ping\.path/s/^;//' /etc/php5/fpm/pool.d/www.conf
+
+##############################################################################
 # Get access to FPM_Status page /status
+##############################################################################
 RUN sed -i '/^;pm\.status_path/s/^;//' /etc/php5/fpm/pool.d/www.conf
 
+##############################################################################
 # Prevent PHP Warning: 'xdebug' already loaded.
 # XDebug loaded with the core
+##############################################################################
 RUN sed -i '/.*xdebug.so$/s/^/;/' /etc/php5/mods-available/xdebug.ini
 
+##############################################################################
 # Install HHVM
+##############################################################################
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449
 RUN echo deb http://dl.hhvm.com/debian jessie main | tee /etc/apt/sources.list.d/hhvm.list
 RUN apt-get update && apt-get install -y hhvm
 
+##############################################################################
+# Set timezone
+##############################################################################
+RUN echo America/Argentina/Buenos_Aires | tee /etc/timezone
+RUN dpkg-reconfigure --frontend noninteractive tzdata
+
+##############################################################################
+# PHPUnit
+##############################################################################
+RUN wget https://phar.phpunit.de/phpunit-5.7.phar
+RUN mv phpunit-5.7.phar phpunit.phar
+RUN chmod +x phpunit.phar
+RUN mv phpunit.phar /usr/local/bin/phpunit
+RUN phpunit --version
+
+##############################################################################
 # Add configuration files
+##############################################################################
 COPY config-docker/conf/nginx.conf /etc/nginx/
 COPY config-docker/conf/supervisord.conf /etc/supervisor/conf.d/
 COPY config-docker/conf/php.ini /etc/php5/fpm/conf.d/40-custom.ini
 COPY config-docker/conf/php.ini /etc/php5/cli/conf.d/40-custom.ini
-
-# Set timezone
-RUN echo America/Argentina/Buenos_Aires | tee /etc/timezone
-RUN dpkg-reconfigure --frontend noninteractive tzdata
-
 WORKDIR /var/www/cajero
 
 ################################################################################
