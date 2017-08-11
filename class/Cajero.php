@@ -12,42 +12,67 @@
 class Cajero {
 
     private $billetes = array(
-        '10' => 0,
-        '20' => 0,
-        '50' => 0,
-        '100' => 0,
-        '500' => 0,
+        'ARS' => array(
+            '10' => 0,
+            '20' => 0,
+            '50' => 0,
+            '100' => 0,
+            '500' => 0
+        ),
+        'DLR' => array(
+            '10' => 0,
+            '20' => 0,
+            '50' => 0,
+            '100' => 0
+        ),
+        'EUR' => array(
+            '10' => 0,
+            '20' => 0,
+            '50' => 0,
+            '100' => 0,
+            '200' => 0,
+            '500' => 0,
+        )
     );
     private $maximaPorBillete = 1000;
     private $maxBilleteDeposito = 100;
-    private $extraccionMaxima = 1000;
+    private $extraccionMaxima = array(
+        'ARS' => 1000,
+        'DLR' => 500,
+        'EUR' => 400
+    );
 
     /**
      * Realiza un nuevo deposito
      *
-     * @param integer $cant,  integer $denominacion
+     * @param string $moneda, integer $cant,  integer $denominacion
      *
      * @throws \Exception
      *
      * @return \Array
      */
-    public function depositar($cant, $denominacion){
-        if(!is_int($cant) || !is_int($denominacion)){
-            throw new Exception ('Parametros invalidos, los 2 parametros deben ser de tipo "integer"');
+    public function depositar($moneda, $cant, $denominacion){
+        if(!is_int($cant) || !is_int($denominacion)  || !is_string($moneda)){
+            throw new Exception ('Parametros invalidos');
         }
-        if(!array_key_exists($denominacion, $this->billetes)){
+        $moneda = strtoupper($moneda);
+        if(!array_key_exists($moneda, $this->billetes)){
+            throw new Exception ('Moneda invalida.');
+        }
+        if(!array_key_exists($denominacion, $this->billetes[$moneda])){
             throw new Exception ('Denominacion invalida.');
         }
         if($this->maxBilleteDeposito < $cant){
             throw new Exception ('La cantidad de billetes a depositar excede la permitida.');
         }
-        if($this->getCapacidadRestante($denominacion) < $cant){
+        if($this->getCapacidadRestante($moneda, $denominacion) < $cant){
             throw new Exception ('Disculpe en este momento no podemos realizar la operacion.');
         }
-        $this->billetes[$denominacion] += $cant;
+        $this->billetes[$moneda][$denominacion] += $cant;
         $response = array(
             'code' => 200,
-            'message' => 'Su deposito por $' . $cant * $denominacion . ' se realizo correctamente.'
+            'message' => 'Su deposito por $' . $moneda . ' ' . $cant * $denominacion . ' se realizo correctamente.',
+            'saldo' => $this->getEfectivoTotal($moneda)
         );
         return $response;
     }
@@ -55,19 +80,20 @@ class Cajero {
     /**
      * Realiza una nueva Extraccion
      *
-     * @param integer $monto
+     * @param string $moneda, integer $monto
      *
      * @throws \Exception
      *
      * @return \Array
      */
-    public function extraer($monto){
-        if(!is_int($monto)){
-            throw new Exception ('Parametro invalido, el parametro debe ser de tipo "integer"');
+    public function extraer($moneda, $monto){
+        if(!is_int($monto) || !is_string($moneda)){
+            throw new Exception ('Parametros invalidos');
         }
-        $total = $this->getEfectivoTotal();
+        $moneda = strtoupper($moneda);
+        $total = $this->getEfectivoTotal($moneda);
         $resto = $monto;
-        if($this->extraccionMaxima < $monto){
+        if($this->extraccionMaxima[$moneda] < $monto){
             throw new Exception ('Supera la capacidad maxima de extraccion.');
         }
         if($total < $monto){
@@ -75,7 +101,7 @@ class Cajero {
         }
         $modulo = 1;
         $billetesPorDenaminacion = array();
-        foreach ($this->getBilletes() as $denominacion => $cantidadBilletes){
+        foreach ($this->getBilletes($moneda) as $denominacion => $cantidadBilletes){
             if($modulo != 0 || $resto >= $denominacion){
                 $modulo = $resto % $denominacion;
                 $billetesAUtilizar = (int) ($resto / $denominacion);
@@ -91,14 +117,15 @@ class Cajero {
         }
 
         if($resto === 0){
-            $this->restarBilletes($billetesPorDenaminacion);
+            $this->restarBilletes($moneda, $billetesPorDenaminacion);
         }else{
             throw new Exception ('Disculpe no tenemos el cambio suficiente para realizar la extracion.');
         }
 
         $response = array(
             'code' => 200,
-            'message' => 'Su extraccion por $' . $monto . ' se realizo correctamente.'
+            'message' => 'Su extraccion por $' . $moneda . ' ' . $monto . ' se realizo correctamente.',
+            'saldo' => $this->getEfectivoTotal($moneda)
         );
 
         return $response;
@@ -107,28 +134,28 @@ class Cajero {
     /**
      * Retorna la capacidad restante dentro del cajero para guardar billetes
      *
-     * @param integer $denominacion
+     * @param string $moneda, integer $denominacion
      *
      * @throws \Exception
      *
      * @return integer
      */
-    private function getCapacidadRestante($denominacion) {
-        return $this->maximaPorBillete - $this->billetes[$denominacion];
+    private function getCapacidadRestante($moneda, $denominacion) {
+        return $this->maximaPorBillete - $this->billetes[$moneda][$denominacion];
     }
 
     /**
      * Retorna el total de efectivo dentro del cajero
      *
-     * @param void
+     * @param string $moneda
      *
      * @throws \Exception
      *
      * @return integer
      */
-    private function getEfectivoTotal(){
+    private function getEfectivoTotal($moneda){
         $total = 0;
-        foreach ($this->billetes as $denominacion => $cantidadBilletes){
+        foreach ($this->billetes[$moneda] as $denominacion => $cantidadBilletes){
             $total += ($denominacion * $cantidadBilletes);
         }
         return $total;
@@ -137,13 +164,13 @@ class Cajero {
     /**
      * Retorna una matriz con todos Billetes que tengan stock en el cajero
      *
-     * @param void
+     * @param string $moneda
      *
      * @return Array
      */
-    private function getBilletes(){
+    private function getBilletes($moneda){
         $billetes = array();
-        foreach ($this->billetes as $denominacion => $cantidadBilletes){
+        foreach ($this->billetes[$moneda] as $denominacion => $cantidadBilletes){
             if($cantidadBilletes > 0){
                 $billetes[$denominacion] = $cantidadBilletes;
             }
@@ -155,13 +182,13 @@ class Cajero {
     /**
      * Metodo que resta los billetes extraidos del cajero
      *
-     * @param Array $billetes
+     * @param string $moneda, Array $billetes
      *
      * @return void
      */
-    private function restarBilletes($billetes){
+    private function restarBilletes($moneda, $billetes){
         foreach ($billetes as $denominacion => $cantidadBilletes){
-            $this->billetes[$denominacion] -= $cantidadBilletes;
+            $this->billetes[$moneda][$denominacion] -= $cantidadBilletes;
         }
     }
 }

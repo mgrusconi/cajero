@@ -10,19 +10,19 @@ final class CajeroTest extends TestCase{
 
     public function testDepositarOk() {
         $cajero = new Cajero;
-        $res = $cajero->depositar(20, 100);
+        $res = $cajero->depositar('ars', 20, 100);
         print("{$res['message']}\n");
         $this->assertEquals(200, $res['code']);
     }
 
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage Parametros invalidos, los 2 parametros deben ser de tipo "integer"
+     * @expectedExceptionMessage Parametros invalidos
      */
     public function testDepositarErrorParams() {
         $cajero = new Cajero;
-        print("Parametros invalidos, los 2 parametros deben ser de tipo 'integer'\n");
-        $this->expectException($cajero->depositar('asd', 'asd'));
+        print("Parametros invalidos\n");
+        $this->expectException($cajero->depositar(999,'asd', 'asd'));
     }
 
     /**
@@ -32,7 +32,7 @@ final class CajeroTest extends TestCase{
     public function testDepositarErrorValue() {
         $cajero = new Cajero;
         print("Denominacion invalida\n");
-        $this->expectException($cajero->depositar(10, 15));
+        $this->expectException($cajero->depositar('dlr',10, 15));
     }
 
     /**
@@ -42,25 +42,25 @@ final class CajeroTest extends TestCase{
     public function testDepositarErrorMaxCapacity() {
         $cajero = new Cajero;
         print("La cantidad de billetes a depositar excede la permitida\n");
-        $this->expectException($cajero->depositar(1900, 20));
+        $this->expectException($cajero->depositar('eur', 1900, 20));
     }
 
     public function testExtraerOk() {
         $cajero = new Cajero;
-        $cajero->depositar(20, 50);
-        $res = $cajero->extraer(100);
+        $cajero->depositar('eur',20, 50);
+        $res = $cajero->extraer('eur', 100);
         print("{$res['message']}\n");
         $this->assertEquals(200, $res['code']);
     }
 
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage Parametro invalido, el parametro debe ser de tipo "integer"
+     * @expectedExceptionMessage Parametros invalidos
      */
     public function testExtraerErrorParams() {
         $cajero = new Cajero;
-        print("Parametro invalido, el parametro debe ser de tipo 'integer'\n");
-        $this->expectException($cajero->extraer('asd'));
+        print("Parametros invalidos\n");
+        $this->expectException($cajero->extraer(999, 'asd'));
     }
 
     /**
@@ -70,7 +70,7 @@ final class CajeroTest extends TestCase{
     public function testExtraerErrorMaxCapacity() {
         $cajero = new Cajero;
         print("Supera la capacidad maxima de extraccion\n");
-        $this->expectException($cajero->extraer(100));
+        $this->expectException($cajero->extraer('dlr', 100));
     }
 
     /**
@@ -80,7 +80,17 @@ final class CajeroTest extends TestCase{
     public function testExtraerErrorChange() {
         $cajero = new Cajero;
         print("Disculpe no tenemos el cambio suficiente para realizar la extracion\n");
-        $cajero->depositar(20, 20);
-        $this->expectException($cajero->extraer(50));
+        $cajero->depositar('ars', 20, 20);
+        $this->expectException($cajero->extraer('ars', 50));
+    }
+
+    public function testConsolidarSaldo() {
+        $cajero = new Cajero;
+        print("Consolidar Saldo\n");
+        $res = $cajero->depositar('ars', 20, 100);
+        $saldoInicial = $res['saldo'];
+        $res = $cajero->extraer('ars', 1000);
+        $saldoFinal = $res['saldo'];
+        $this->assertEquals($saldoFinal, $saldoInicial - 1000);
     }
 }
