@@ -8,7 +8,7 @@ Se puede ver unos pequeños ejemplos de utilizacion y comportamiento en el index
 
 ## Instalacion
 
-El repositorio contiene un Dockerfile y un docker-compose. Si se tiene estas herramientas instaladas solo es necesario correr el comando docker-compose up -d. Una vez este levantado el ambiete se puede ingresar por navegador tanto con localhost:81 como por cajero.dev
+El repositorio contiene un Dockerfile y un docker-compose.yml. Si se tiene estas herramientas instaladas solo es necesario correr el comando docker-compose up -d. Una vez este levantado el ambiete se puede ingresar por navegador con localhost:81
 
 ## Tests
 
