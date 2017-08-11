@@ -1,0 +1,23 @@
+version: "2"
+
+services:
+  cajero:
+    build: ./cajero
+    ports:
+      - "81:80"
+    environment:
+      - VIRTUAL_HOST=cajero.dev
+    volumes:
+      - ./cajero:/var/www/cajero
+      - ./cajero/config-docker/sites:/etc/nginx/conf.d
+      - ./cajero/config-docker/logs:/var/log/supervisor
+
+  proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy-html
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    links:
+      - cajero
