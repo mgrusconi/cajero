@@ -19,7 +19,7 @@ class Cajero {
             '100' => 0,
             '500' => 0
         ),
-        'DLR' => array(
+        'USD' => array(
             '10' => 0,
             '20' => 0,
             '50' => 0,
@@ -38,7 +38,7 @@ class Cajero {
     private $maxBilleteDeposito = 100;
     private $extraccionMaxima = array(
         'ARS' => 1000,
-        'DLR' => 500,
+        'USD' => 500,
         'EUR' => 400
     );
 
@@ -91,6 +91,9 @@ class Cajero {
             throw new Exception ('Parametros invalidos');
         }
         $moneda = strtoupper($moneda);
+        if(!array_key_exists($moneda, $this->billetes)){
+            throw new Exception ('Moneda invalida.');
+        }
         $total = $this->getEfectivoTotal($moneda);
         $resto = $monto;
         if($this->extraccionMaxima[$moneda] < $monto){

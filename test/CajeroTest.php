@@ -32,7 +32,7 @@ final class CajeroTest extends TestCase{
     public function testDepositarErrorValue() {
         $cajero = new Cajero;
         print("Denominacion invalida\n");
-        $this->expectException($cajero->depositar('dlr',10, 15));
+        $this->expectException($cajero->depositar('usd',10, 15));
     }
 
     /**
@@ -43,6 +43,15 @@ final class CajeroTest extends TestCase{
         $cajero = new Cajero;
         print("La cantidad de billetes a depositar excede la permitida\n");
         $this->expectException($cajero->depositar('eur', 1900, 20));
+    }
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Moneda invalida.
+     */
+    public function testDepositarErrorMoneda() {
+        $cajero = new Cajero;
+        print("Moneda invalida.\n");
+        $this->expectException($cajero->depositar('yen', 1900, 20));
     }
 
     public function testExtraerOk() {
@@ -70,7 +79,7 @@ final class CajeroTest extends TestCase{
     public function testExtraerErrorMaxCapacity() {
         $cajero = new Cajero;
         print("Supera la capacidad maxima de extraccion\n");
-        $this->expectException($cajero->extraer('dlr', 100));
+        $this->expectException($cajero->extraer('usd', 100));
     }
 
     /**
@@ -82,6 +91,16 @@ final class CajeroTest extends TestCase{
         print("Disculpe no tenemos el cambio suficiente para realizar la extracion\n");
         $cajero->depositar('ars', 20, 20);
         $this->expectException($cajero->extraer('ars', 50));
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Moneda invalida.
+     */
+    public function testExtraerErrorMoneda() {
+        $cajero = new Cajero;
+        print("Moneda invalida.\n");
+        $this->expectException($cajero->extraer('yen', 50));
     }
 
     public function testConsolidarSaldo() {
