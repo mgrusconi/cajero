@@ -1,5 +1,5 @@
 <?php
-
+    include 'CustomException.php';
 /**
  * Cajero
  *
@@ -53,20 +53,20 @@ class Cajero {
      */
     public function depositar($moneda, $cant, $denominacion){
         if(!is_int($cant) || !is_int($denominacion)  || !is_string($moneda)){
-            throw new Exception ('Parametros invalidos');
+            throw new InvalidParameterException ('Parametros invalidos');
         }
         $moneda = strtoupper($moneda);
         if(!array_key_exists($moneda, $this->billetes)){
-            throw new Exception ('Moneda invalida.');
+            throw new CurrencyException ('Moneda invalida.');
         }
         if(!array_key_exists($denominacion, $this->billetes[$moneda])){
-            throw new Exception ('Denominacion invalida.');
+            throw new DenominationException ('Denominacion invalida.');
         }
         if($this->maxBilleteDeposito < $cant){
-            throw new Exception ('La cantidad de billetes a depositar excede la permitida.');
+            throw new QuantityException ('La cantidad de billetes a depositar excede la permitida.');
         }
         if($this->getCapacidadRestante($moneda, $denominacion) < $cant){
-            throw new Exception ('Disculpe en este momento no podemos realizar la operacion.');
+            throw new QuantityException ('Disculpe en este momento no podemos realizar la operacion.');
         }
         $this->billetes[$moneda][$denominacion] += $cant;
         $response = array(
@@ -88,19 +88,19 @@ class Cajero {
      */
     public function extraer($moneda, $monto){
         if(!is_int($monto) || !is_string($moneda)){
-            throw new Exception ('Parametros invalidos');
+            throw new InvalidParameterException ('Parametros invalidos');
         }
         $moneda = strtoupper($moneda);
         if(!array_key_exists($moneda, $this->billetes)){
-            throw new Exception ('Moneda invalida.');
+            throw new CurrencyException ('Moneda invalida.');
         }
         $total = $this->getEfectivoTotal($moneda);
         $resto = $monto;
         if($this->extraccionMaxima[$moneda] < $monto){
-            throw new Exception ('Supera la capacidad maxima de extraccion.');
+            throw new QuantityException ('Supera la capacidad maxima de extraccion.');
         }
         if($total < $monto){
-            throw new Exception ('Disculpe en este momento de esa cantidad de efectivo.');
+            throw new BalanceException ('Disculpe en este momento de esa cantidad de efectivo.');
         }
         $modulo = 1;
         $billetesPorDenaminacion = array();
@@ -122,7 +122,7 @@ class Cajero {
         if($resto === 0){
             $this->restarBilletes($moneda, $billetesPorDenaminacion);
         }else{
-            throw new Exception ('Disculpe no tenemos el cambio suficiente para realizar la extracion.');
+            throw new BalanceException ('Disculpe no tenemos el cambio suficiente para realizar la extracion.');
         }
 
         $response = array(

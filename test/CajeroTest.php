@@ -16,7 +16,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException InvalidParameterException
      * @expectedExceptionMessage Parametros invalidos
      */
     public function testDepositarErrorParams() {
@@ -26,7 +26,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException DenominationException
      * @expectedExceptionMessage Denominacion invalida.
      */
     public function testDepositarErrorValue() {
@@ -36,7 +36,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException QuantityException
      * @expectedExceptionMessage La cantidad de billetes a depositar excede la permitida.
      */
     public function testDepositarErrorMaxCapacity() {
@@ -45,7 +45,7 @@ final class CajeroTest extends TestCase{
         $this->expectException($cajero->depositar('eur', 1900, 20));
     }
     /**
-     * @expectedException Exception
+     * @expectedException CurrencyException
      * @expectedExceptionMessage Moneda invalida.
      */
     public function testDepositarErrorMoneda() {
@@ -63,7 +63,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException InvalidParameterException
      * @expectedExceptionMessage Parametros invalidos
      */
     public function testExtraerErrorParams() {
@@ -73,7 +73,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException BalanceException
      * @expectedExceptionMessage Disculpe en este momento de esa cantidad de efectivo.
      */
     public function testExtraerErrorMaxCapacity() {
@@ -83,7 +83,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException BalanceException
      * @expectedExceptionMessage Disculpe no tenemos el cambio suficiente para realizar la extracion.
      */
     public function testExtraerErrorChange() {
@@ -94,7 +94,7 @@ final class CajeroTest extends TestCase{
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException CurrencyException
      * @expectedExceptionMessage Moneda invalida.
      */
     public function testExtraerErrorMoneda() {
